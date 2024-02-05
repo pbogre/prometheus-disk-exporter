@@ -1,0 +1,21 @@
+PARTITION DATA (csv)
+block       (/dev/sda1),
+mountpoint  (/),
+filesystem  (ext4),
+used bytes  (1231231232),
+size bytes  (9999999999),
+disk block  (/dev/sda)
+
+DISK DATA (csv)
+block           (/dev/sda),
+model family    (Western Digital Blue),
+serial number   (WD-W................),
+rotation rate   (7200rpm)
+power on hours  (11000),
+power cycles    (2000),
+raw read err r  (0),
+temperature     (41)
+
+
+https://stackoverflow.com/questions/38972736/how-to-print-lines-between-two-patterns-inclusive-or-exclusive-in-sed-awk-or
+https://github.com/cloudandheat/prometheus_smart_exporter
