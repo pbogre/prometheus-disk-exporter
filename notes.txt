@@ -1,3 +1,13 @@
+THOUGHTS
+the bash-python 'embedding' is pretty awkward, especially because i 
+have two scripts that do different things but where one calls the 
+other. 
+python is really useful for the socket handling, but if i could find 
+a way to do that in bash it would be perfect.
+actually the main problem here is that the socket script should be 
+the 'master' over the getter script, because new data should be
+collected every time a socket connection is made. so this needs fixing.
+
 PARTITION DATA (csv)
 block       (/dev/sda1),
 mountpoint  (/),
@@ -16,6 +26,13 @@ power cycles    (2000),
 raw read err r  (0),
 temperature     (41)
 
+SOCKET PROTOCOL
+bytes   type            description
+0-3     unsigned        disks data length        
+4-7     unsigned        parts data length
+8-X     utf-8           repr of disks data list
+X+1-end utf-8           repr of parts data list
 
+LINKS
 https://stackoverflow.com/questions/38972736/how-to-print-lines-between-two-patterns-inclusive-or-exclusive-in-sed-awk-or
 https://github.com/cloudandheat/prometheus_smart_exporter

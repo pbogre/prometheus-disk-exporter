@@ -1,33 +1,23 @@
 import time
+import socket
 import prometheus_client
 from prometheus_client import start_http_server, Info, Gauge
 
-# TODO clean data when parsing (remove \n) and convert to proper type
+def connect_socket(socket_path) -> socket.socket:
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    print("connecting to UNIX socket at " + socket_path)
+    s.connect(socket_path)
 
-def parse_csv():
-    # parse partition data
-    parts_csv = open("data/parts", "r").readlines()
-    parts = []
+    return s
 
-    for row in parts_csv:
-        parts.append(row.split(','))
+def receive_packets(s: socket.socket):
+    disks_packet_size = int.from_bytes(s.recv(4))
+    parts_packet_size = int.from_bytes(s.recv(4))
 
-    # parse disk data
-    disks_csv = open("data/disks", "r").readlines()
-    disks = []
+    disks = eval(s.recv(disks_packet_size))
+    parts = eval(s.recv(parts_packet_size))
 
-    for row in disks_csv:
-        disks.append(row.split(','))
-
-    yield disks
-
-    # add parent disk column to partition rows
-    for part in parts:
-        for disk in disks:
-            if disk[0] in part[0]:
-                part.append(disk[0])
-
-    yield parts
+    return disks, parts
 
 class Collector:
     def __init__(self):
@@ -66,7 +56,14 @@ class Collector:
             self.part_size_bytes.labels(block=part[0], disk=part[5]).set(part[4])
 
 if __name__ == '__main__':
-    disks, parts = parse_csv()
+    s = connect_socket("/tmp/prometheus-disk-exporter.sock")
+    disks, parts = receive_packets(s)
+
+    print(disks)
+    print(parts)
+
+    exit(0)
+
     collector = Collector()
 
     # disable default metrics
@@ -74,8 +71,8 @@ if __name__ == '__main__':
     prometheus_client.REGISTRY.unregister(prometheus_client.PLATFORM_COLLECTOR)
     prometheus_client.REGISTRY.unregister(prometheus_client.PROCESS_COLLECTOR)
 
-    start_http_server(3112)
-    while True:
-        time.sleep(1)
-        disks,parts = parse_csv()
-        collector.collect(disks, parts)
+    #start_http_server(3112)
+    # instead of a timed loop this should happen on each get request
+    #while True:
+    #    time.sleep(5)
+    #    collector.collect(disks, parts)

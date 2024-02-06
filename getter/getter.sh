@@ -1,16 +1,17 @@
 #!/bin/bash
 
-# TODO instead of writing to a file, use sockets to communicate directly with server
 # TODO make smart regex into 2 functions to avoid repetition
-
-echo -n > data/disks
+# TODO run python script as non-root (otherwise socket will require root)
+# TODO use script path to execute socket.py, as currently it won't find it 
+#      unless you run this script from the same folder
 
 lsblk=$(lsblk -o TYPE,FSTYPE,FSUSED,FSSIZE,MOUNTPOINT,NAME,NAME -b)
 
-disk_blks=$( echo "$lsblk" | awk '$1=="disk" {print "/dev/"$2}')
+disk_blks=$( echo "$lsblk" | awk '$1=="disk" {print $2}')
+export disk_blks
 for i in $disk_blks;
 do
-    smart=$(smartctl -iA $i)
+    smart=$(smartctl -iA "/dev/"$i)
 
     model_family=$(echo "$smart" | grep "Model Family:" | sed 's/^Model Family:\s*\(\S.*\)$/\1/g')
     serial_number=$(echo "$smart" | grep "Serial Number:" | sed 's/^Serial Number:\s*\(\S.*\)$/\1/g')
@@ -23,8 +24,10 @@ do
     raw_read_error_rate=$(echo "$smart" | awk '$2=="Raw_Read_Error_Rate" {print $10}')
     temperature=$(echo "$smart" | awk '$2=="Temperature_Celsius" {print $10}')
    
-    echo "$i,$model_family,$serial_number,$rotation_rate,$power_on_hours,$power_cycle_count,$raw_read_error_rate,$temperature" >> data/disks
+    export "$i"_info=""/dev/"$i,$model_family,$serial_number,$rotation_rate,$power_on_hours,$power_cycle_count,$raw_read_error_rate,$temperature"
 done
 
 parts_info=$(echo "$lsblk" | awk '$1=="part" {print "/dev/"$7","$5","$2","$3","$4}')
-echo "$parts_info" > data/parts
+export parts_info
+
+python socket.py
