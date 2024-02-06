@@ -1,13 +1,3 @@
-THOUGHTS
-the bash-python 'embedding' is pretty awkward, especially because i 
-have two scripts that do different things but where one calls the 
-other. 
-python is really useful for the socket handling, but if i could find 
-a way to do that in bash it would be perfect.
-actually the main problem here is that the socket script should be 
-the 'master' over the getter script, because new data should be
-collected every time a socket connection is made. so this needs fixing.
-
 PARTITION DATA (csv)
 block       (/dev/sda1),
 mountpoint  (/),

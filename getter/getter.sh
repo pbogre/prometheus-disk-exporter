@@ -7,11 +7,10 @@
 
 lsblk=$(lsblk -o TYPE,FSTYPE,FSUSED,FSSIZE,MOUNTPOINT,NAME,NAME -b)
 
-disk_blks=$( echo "$lsblk" | awk '$1=="disk" {print $2}')
-export disk_blks
+disk_blks=$( echo "$lsblk" | awk '$1=="disk" {print "/dev/"$2}')
 for i in $disk_blks;
 do
-    smart=$(smartctl -iA "/dev/"$i)
+    smart=$(smartctl -iA $i)
 
     model_family=$(echo "$smart" | grep "Model Family:" | sed 's/^Model Family:\s*\(\S.*\)$/\1/g')
     serial_number=$(echo "$smart" | grep "Serial Number:" | sed 's/^Serial Number:\s*\(\S.*\)$/\1/g')
@@ -24,10 +23,8 @@ do
     raw_read_error_rate=$(echo "$smart" | awk '$2=="Raw_Read_Error_Rate" {print $10}')
     temperature=$(echo "$smart" | awk '$2=="Temperature_Celsius" {print $10}')
    
-    export "$i"_info=""/dev/"$i,$model_family,$serial_number,$rotation_rate,$power_on_hours,$power_cycle_count,$raw_read_error_rate,$temperature"
+    echo $i,$model_family,$serial_number,$rotation_rate,$power_on_hours,$power_cycle_count,$raw_read_error_rate,$temperature
 done
+echo "DISK DATA END"
 
-parts_info=$(echo "$lsblk" | awk '$1=="part" {print "/dev/"$7","$5","$2","$3","$4}')
-export parts_info
-
-python socket.py
+echo "$lsblk" | awk '$1=="part" {print "/dev/"$7","$5","$2","$3","$4}'

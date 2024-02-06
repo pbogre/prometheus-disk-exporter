@@ -1,28 +1,37 @@
 import os
+import subprocess
 import socket
 
-# TODO get new data on sock connection
+def get_data() -> tuple[list[str], list[str]]:
+    """
+    Run getter bash script and parse the data.
+    Returns lists of disks and partition data respectively.
+    """
+    output = subprocess.check_output(["./getter.sh"]).decode()
+    disk_data, part_data = output.split("DISK DATA END\n", 1) 
 
-# parse disk data
-disk_blks = os.environ["disk_blks"].split('\n')
+    # parse disk_data
+    disks = []
+    for row in disk_data.split('\n'):
+        disks.append(row.split(','))
 
-disks = []
-for blk in disk_blks:
-    disk_csv = os.environ[blk + "_info"]
-    disks.append(disk_csv.split(','))
+    disks.pop()
 
-# parse partition data
-parts_csv = os.environ["parts_info"].split('\n')
-parts = []
+    # parse partition_data
+    parts = []
+    for row in part_data.split('\n'):
+        parts.append(row.split(','))
+        # find & add partition disk
+        for disk in disks:
+            if disk[0] in parts[-1][0]:
+                parts[-1].append(disk[0])
 
-for row in parts_csv:
-    parts.append(row.split(','))
-    # find & add partition disk
-    for disk in disks:
-        if disk[0] in parts[-1][0]:
-            parts[-1].append(disk[0])
+    parts.pop()
 
-# setup unix socket
+    return disks, parts
+
+# serve unix socket
+
 socket_path = "/tmp/prometheus-disk-exporter.sock"
 
 try:
@@ -40,6 +49,8 @@ with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
         conn.shutdown(socket.SHUT_RD)
         with conn:
             print("new connection")
+
+            disks, parts = get_data()
 
             disks_packet = repr(disks).encode('utf-8')
             parts_packet = repr(parts).encode('utf-8')
