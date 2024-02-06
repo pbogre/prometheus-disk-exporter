@@ -62,6 +62,8 @@ class DiskCollector:
             self.part_usage_bytes.labels(block=part[0], disk=part[5]).set(part[3])
             self.part_size_bytes.labels(block=part[0], disk=part[5]).set(part[4])
 
+        sock.close()
+
 if __name__ == '__main__':
     socket_path = "/tmp/prometheus-disk-exporter.sock"
     collector = DiskCollector(socket_path)
