@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# TODO make smart regex into 2 functions to avoid repetition
-# TODO run python script as non-root (otherwise socket will require root)
-# TODO use script path to execute socket.py, as currently it won't find it 
-#      unless you run this script from the same folder
-
 lsblk=$(lsblk -o TYPE,FSTYPE,FSUSED,FSSIZE,MOUNTPOINT,NAME,NAME -b)
 
 disk_blks=$( echo "$lsblk" | awk '$1=="disk" {print "/dev/"$2}')

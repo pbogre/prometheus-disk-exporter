@@ -74,7 +74,7 @@ if __name__ == '__main__':
     prometheus_client.REGISTRY.unregister(prometheus_client.PROCESS_COLLECTOR)
 
     start_http_server(9313)
-    # TODO instead of a timed loop this should happen on each get request
+
     while True:
         time.sleep(5)
         collector.collect()
