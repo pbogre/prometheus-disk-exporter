@@ -23,10 +23,8 @@ do
     raw_read_error_rate=$(echo "$smart" | awk '$2=="Raw_Read_Error_Rate" {print $10}')
     temperature=$(echo "$smart" | awk '$2=="Temperature_Celsius" {print $10}')
    
-    echo "/dev/"$i",$model_family,$serial_number,$rotation_rate,$power_on_hours,$power_cycle_count,$raw_read_error_rate,$temperature" >> data/disks
+    echo "$i,$model_family,$serial_number,$rotation_rate,$power_on_hours,$power_cycle_count,$raw_read_error_rate,$temperature" >> data/disks
 done
 
 parts_info=$(echo "$lsblk" | awk '$1=="part" {print "/dev/"$7","$5","$2","$3","$4}')
 echo "$parts_info" > data/parts
-
-
