@@ -85,4 +85,4 @@ if __name__ == '__main__':
     REGISTRY.unregister(PROCESS_COLLECTOR)
     REGISTRY.unregister(PLATFORM_COLLECTOR)
 
-    HTTPServer(('127.0.0.1', 9313), MetricsHandler).serve_forever()
+    HTTPServer(('0.0.0.0', 9313), MetricsHandler).serve_forever()
