@@ -17,19 +17,18 @@
 |2      |filesystem  |`ext4`,
 |3      |used bytes  |`1231231232`,
 |4      |size bytes  |`9999999999`,
-|5      |disk block  |`/dev/sda`
+|5      |disk serial |`WD-W...........`
 
-# disk data (csv)
+# disk data from socket (csv)
 |column | value              |example
 |-------|--------------------|-----------------
-|0      |block               |`/dev/sda`,
+|0      |serial number       |`WD-W................`,
 |1      |model family        |`Western Digital Blue`,
-|2      |serial number       |`WD-W................`,
-|3      |rotation rate       |`7200rpm`
-|4      |power on hours      |`11000`,
-|5      |power cycles        |`2000`,
-|6      |raw read error rate |`0`,
-|7      |temperature         |`41`
+|2      |rotation rate       |`7200rpm`
+|3      |power on hours      |`11000`,
+|4      |power cycles        |`2000`,
+|5      |raw read error rate |`0`,
+|6      |temperature         |`41`
 
 # socket protocol
 |bytes  |type           |description

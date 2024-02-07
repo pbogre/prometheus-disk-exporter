@@ -26,14 +26,14 @@ class DiskCollector(Collector):
 
     def collect(self):
         # define metrics
-        disk_labels = ['block']
+        disk_labels = ['disk_serial']
         disk_model = InfoMetricFamily('disk_model', 'Disk Model Family', labels=disk_labels)
         disk_power_on_hours = GaugeMetricFamily('disk_power_on_hours', 'Hours spent with disk powered', labels=disk_labels)
         disk_power_cycle_count = GaugeMetricFamily('disk_power_cycle_count', 'Disk power cycle count', labels=disk_labels)
         disk_raw_read_error_rate = GaugeMetricFamily('disk_raw_read_error_rate', 'Disk raw read error rate', labels=disk_labels)
         disk_temperature = GaugeMetricFamily('disk_temperature', 'Disk temperature in Celsius', labels=disk_labels)
 
-        part_labels = ['block', 'disk']
+        part_labels = ['block', 'disk_serial']
         part_info = InfoMetricFamily('partition', 'Partition metadata information', labels=part_labels)
         part_usage_bytes = GaugeMetricFamily('partition_usage_bytes', 'Partition used size in bytes', labels=part_labels)
         part_size_bytes = GaugeMetricFamily('partition_size_bytes', 'Partition total size in bytes', labels=part_labels)
@@ -47,13 +47,12 @@ class DiskCollector(Collector):
         for disk in disks:
             disk_model.add_metric(labels=[disk[0]], value={
                 'model_family': disk[1],
-                'serial': disk[2],
-                'rpm': disk[3]
+                'rpm': disk[2]
             })
-            disk_power_on_hours.add_metric(labels=[disk[0]], value=disk[4])
-            disk_power_cycle_count.add_metric(labels=[disk[0]], value=disk[5])
-            disk_raw_read_error_rate.add_metric(labels=[disk[0]], value=disk[6])
-            disk_temperature.add_metric(labels=[disk[0]], value=disk[7])
+            disk_power_on_hours.add_metric(labels=[disk[0]], value=disk[3])
+            disk_power_cycle_count.add_metric(labels=[disk[0]], value=disk[4])
+            disk_raw_read_error_rate.add_metric(labels=[disk[0]], value=disk[5])
+            disk_temperature.add_metric(labels=[disk[0]], value=disk[6])
 
         yield disk_model
         yield disk_power_on_hours

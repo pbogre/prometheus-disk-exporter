@@ -8,23 +8,25 @@ def get_data() -> tuple[list[str], list[str]]:
     Returns lists of disks and partition data respectively.
     """
     output = subprocess.check_output(["./getter.sh"]).decode()
-    disk_data, part_data = output.split("DISK DATA END\n", 1) 
+    disk_data, part_data = output.split("\nDISK DATA END\n", 1) 
 
     # parse disk_data
     disks = []
     for row in disk_data.split('\n'):
         disks.append(row.split(','))
 
-    disks.pop()
-
     # parse partition_data
     parts = []
     for row in part_data.split('\n'):
         parts.append(row.split(','))
-        # find & add partition disk
+        # find & add partition disk (serial number)
         for disk in disks:
             if disk[0] in parts[-1][0]:
-                parts[-1].append(disk[0])
+                parts[-1].append(disk[1])
+
+    # cleanup
+    for disk in disks:
+        disk.pop(0)
 
     parts.pop()
 
