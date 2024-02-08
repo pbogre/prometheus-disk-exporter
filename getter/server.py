@@ -38,7 +38,10 @@ socket_path = "/tmp/prometheus-disk-exporter.sock"
 script_path = os.path.join(os.path.dirname(__file__), "getter.sh")
 
 if os.path.exists(socket_path):
-    raise FileExistsError
+    try:
+        os.remove(socket_path)
+    except:
+        raise FileExistsError("Socket file already exists and cannot be deleted")
 
 with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
     s.bind(socket_path)
