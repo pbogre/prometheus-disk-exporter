@@ -37,11 +37,8 @@ def get_data(script_path) -> tuple[list[str], list[str]]:
 socket_path = "/tmp/prometheus-disk-exporter.sock"
 script_path = os.path.join(os.path.dirname(__file__), "getter.sh")
 
-try:
-    os.unlink(socket_path)
-except OSError:
-    if os.path.exists(socket_path):
-        raise
+if os.path.exists(socket_path):
+    raise FileExistsError
 
 with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
     s.bind(socket_path)
