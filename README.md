@@ -1,5 +1,4 @@
 # todo
-- make `server.py` be able to find `getter.sh` regardless of directory it is executed from
 - use systemd socket instead of generating one (which is created with root permissions)
     - or manually set permissions from within the script (chmod 664 socket\_path)
 - ability to pass arguments such as socket path, exporter ip/port, ...

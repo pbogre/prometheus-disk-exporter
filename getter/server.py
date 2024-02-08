@@ -2,12 +2,12 @@ import os
 import subprocess
 import socket
 
-def get_data() -> tuple[list[str], list[str]]:
+def get_data(script_path) -> tuple[list[str], list[str]]:
     """
     Run getter bash script and parse the data.
     Returns lists of disks and partition data respectively.
     """
-    output = subprocess.check_output(["./getter.sh"]).decode()
+    output = subprocess.check_output([script_path]).decode()
     disk_data, part_data = output.split("\nDISK DATA END\n", 1) 
 
     # parse disk_data
@@ -35,6 +35,7 @@ def get_data() -> tuple[list[str], list[str]]:
 # serve unix socket
 
 socket_path = "/tmp/prometheus-disk-exporter.sock"
+script_path = os.path.join(os.path.dirname(__file__), "getter.sh")
 
 try:
     os.unlink(socket_path)
@@ -52,7 +53,7 @@ with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
         with conn:
             print("new connection")
 
-            disks, parts = get_data()
+            disks, parts = get_data(script_path)
 
             disks_packet = repr(disks).encode('utf-8')
             parts_packet = repr(parts).encode('utf-8')
