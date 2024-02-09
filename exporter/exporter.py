@@ -101,14 +101,26 @@ if __name__ == '__main__':
             help="Asbolute path of the UNIX socket to connect to"
             )
 
-    args = parser.parse_args()
-    socket_path = args.socket_path
+    parser.add_argument(
+            "--listen-address", "-l",
+            default="0.0.0.0",
+            help="Address for HTTP server to listen on"
+            )
 
-    REGISTRY.register(DiskCollector(socket_path))
+    parser.add_argument(
+            "--listen-port", "-p",
+            default="9313",
+            help="Port for HTTP server to listen on",
+            type=int
+            )
+
+    args = parser.parse_args()
+
+    REGISTRY.register(DiskCollector(args.socket_path))
 
     # disable default metrics
     REGISTRY.unregister(GC_COLLECTOR)
     REGISTRY.unregister(PROCESS_COLLECTOR)
     REGISTRY.unregister(PLATFORM_COLLECTOR)
 
-    HTTPServer(('0.0.0.0', 9313), MetricsHandler).serve_forever()
+    HTTPServer((args.listen_address, args.listen_port), MetricsHandler).serve_forever()
