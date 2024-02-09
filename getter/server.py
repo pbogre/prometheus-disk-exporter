@@ -55,7 +55,6 @@ if os.path.exists(socket_path):
 
 with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
     s.bind(socket_path)
-    os.chmod(socket_path, 0o666) # to be changed
     s.listen(1)
 
     while True:
