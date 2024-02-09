@@ -16,6 +16,9 @@ it requires root privileges to gather the data from the system, while the
 http server is safely ran at a lower permission level. Additionally the 
 socket is in read-only mode by default.
 
+This project was heavily inspired by another similar project which you
+can have a look at from the credits section of this readme.
+
 ## structure
 
 ### partition data from socket (csv)
