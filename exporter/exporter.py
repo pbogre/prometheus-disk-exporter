@@ -6,8 +6,9 @@ from prometheus_client.registry import Collector
 
 def connect_socket(socket_path) -> socket.socket:
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    print("connecting to UNIX socket at " + socket_path)
     sock.connect(socket_path)
+
+    print("connection successful")
 
     return sock
 
@@ -25,7 +26,28 @@ class DiskCollector(Collector):
         self.socket_path = socket_path
 
     def collect(self):
-        # define metrics
+        # first check if the getter socket works
+        disk_getter_error = GaugeMetricFamily(
+                'disk_getter_error',
+                'Indicates an error with getter socket (connection/retrieving)',
+                labels=['type']
+                )
+
+        # we reconnect on each collection because 
+        # that's how the server knows when to serve
+        try:
+            self.sock = connect_socket(self.socket_path)
+            self.disks, self.parts = receive_packets(self.sock)
+        except Exception as e:
+            print("an exception has occurred while connecting to/retrieving from getter socket!")
+            disk_getter_error.add_metric([e.__class__.__name__], 1)
+            yield disk_getter_error
+            return
+
+        disk_getter_error.add_metric(['None'], 0)
+        yield disk_getter_error
+
+        # if socket works, proceed with metrics
         disk_labels = ['disk_serial']
         disk_model = InfoMetricFamily('disk_model', 'Disk Model Family', labels=disk_labels)
         disk_power_on_hours = GaugeMetricFamily('disk_power_on_hours', 'Hours spent with disk powered', labels=disk_labels)
@@ -38,21 +60,16 @@ class DiskCollector(Collector):
         part_usage_bytes = GaugeMetricFamily('partition_usage_bytes', 'Partition used size in bytes', labels=part_labels)
         part_size_bytes = GaugeMetricFamily('partition_size_bytes', 'Partition total size in bytes', labels=part_labels)
 
-        # we reconnect on each collection because 
-        # that's how the server knows when to serve
-        sock = connect_socket(self.socket_path)
-        disks, parts = receive_packets(sock)
-
         # Disk metrics
-        for disk in disks:
-            disk_model.add_metric(labels=[disk[0]], value={
+        for disk in self.disks:
+            disk_model.add_metric([disk[0]], {
                 'model_family': disk[1],
                 'rpm': disk[2]
             })
-            disk_power_on_hours.add_metric(labels=[disk[0]], value=disk[3])
-            disk_power_cycle_count.add_metric(labels=[disk[0]], value=disk[4])
-            disk_raw_read_error_rate.add_metric(labels=[disk[0]], value=disk[5])
-            disk_temperature.add_metric(labels=[disk[0]], value=disk[6])
+            disk_power_on_hours.add_metric([disk[0]], disk[3])
+            disk_power_cycle_count.add_metric([disk[0]], disk[4])
+            disk_raw_read_error_rate.add_metric([disk[0]], disk[5])
+            disk_temperature.add_metric([disk[0]], disk[6])
 
         yield disk_model
         yield disk_power_on_hours
@@ -61,19 +78,19 @@ class DiskCollector(Collector):
         yield disk_temperature
 
         # Partition metrics
-        for part in parts:
-            part_info.add_metric(labels=[part[0], part[5]], value={
+        for part in self.parts:
+            part_info.add_metric([part[0], part[5]], {
                 'mountpoint': part[1],
                 'filesystem': part[2]
             })
-            part_usage_bytes.add_metric(labels=[part[0], part[5]], value=part[3])
-            part_size_bytes.add_metric(labels=[part[0], part[5]], value=part[4])
+            part_usage_bytes.add_metric([part[0], part[5]], part[3])
+            part_size_bytes.add_metric([part[0], part[5]], part[4])
 
         yield part_info
         yield part_usage_bytes
         yield part_size_bytes
 
-        sock.close()
+        self.sock.close()
 
 if __name__ == '__main__':
     socket_path = "/tmp/prometheus-disk-exporter.sock"
