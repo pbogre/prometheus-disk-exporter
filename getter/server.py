@@ -1,6 +1,7 @@
 import os
 import subprocess
 import socket
+import argparse
 
 def get_data(script_path) -> tuple[list[str], list[str]]:
     """
@@ -34,18 +35,27 @@ def get_data(script_path) -> tuple[list[str], list[str]]:
 
 # serve unix socket
 
-socket_path = "/tmp/prometheus-disk-exporter.sock"
+parser = argparse.ArgumentParser()
+parser.add_argument(
+        "--socket-path", 
+        default="/tmp/prometheus-disk-exporter.sock",
+        help="Asbolute path of the UNIX socket to serve to"
+        )
+
+args = parser.parse_args()
+
+socket_path = args.socket_path
 script_path = os.path.join(os.path.dirname(__file__), "getter.sh")
 
 if os.path.exists(socket_path):
     try:
         os.remove(socket_path)
     except:
-        raise FileExistsError("Socket file already exists and cannot be deleted")
+        raise FileExistsError("Socket already exists and cannot be deleted")
 
 with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
     s.bind(socket_path)
-    os.chmod(socket_path, 0o666)
+    os.chmod(socket_path, 0o666) # to be changed
     s.listen(1)
 
     while True:

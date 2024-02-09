@@ -1,4 +1,5 @@
 import socket
+import argparse
 from http.server import HTTPServer
 from prometheus_client import MetricsHandler, REGISTRY, GC_COLLECTOR, PROCESS_COLLECTOR, PLATFORM_COLLECTOR
 from prometheus_client.metrics_core import GaugeMetricFamily, InfoMetricFamily
@@ -93,7 +94,16 @@ class DiskCollector(Collector):
         self.sock.close()
 
 if __name__ == '__main__':
-    socket_path = "/tmp/prometheus-disk-exporter.sock"
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+            "--socket-path", 
+            default="/tmp/prometheus-disk-exporter.sock",
+            help="Asbolute path of the UNIX socket to connect to"
+            )
+
+    args = parser.parse_args()
+    socket_path = args.socket_path
+
     REGISTRY.register(DiskCollector(socket_path))
 
     # disable default metrics
