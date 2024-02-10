@@ -42,20 +42,33 @@ parser.add_argument(
         help="Asbolute path of the UNIX socket to serve to"
         )
 
+parser.add_argument(
+        "--socket-owner", "-o", 
+        default=None,
+        help="User and group (should have same name) to set as owner \
+              of socket file through chown. If not set, socket will have \
+              read and write permissions for all users."
+        )
+
 args = parser.parse_args()
 
 socket_path = args.socket_path
 script_path = os.path.join(os.path.dirname(__file__), "getter.sh")
 
 if os.path.exists(socket_path):
-    try:
-        os.remove(socket_path)
-    except:
-        raise FileExistsError("Socket already exists and cannot be deleted")
+    # should always work as this program runs with privileges
+    os.remove(socket_path) 
 
 with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
     s.bind(socket_path)
-    os.chmod(socket_path, 0o666) # to be changed
+
+    if args.socket_owner is None:
+        os.chmod(socket_path, 0o666)
+    else:
+        import shutil
+        shutil.chown(socket_path, args.socket_owner, args.socket_owner)
+        os.chmod(socket_path, 0o600)
+
     s.listen(1)
 
     while True:
