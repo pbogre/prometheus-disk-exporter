@@ -19,6 +19,39 @@ socket is in read-only mode by default.
 This project was heavily inspired by another similar project which you
 can have a look at from the credits section of this readme.
 
+## arguments
+
+### server.py
+
+```
+usage: server.py [-h] [--socket-path SOCKET_PATH] [--socket-owner SOCKET_OWNER]
+
+options:
+  -h, --help            show this help message and exit
+  --socket-path SOCKET_PATH
+                        Asbolute path of the UNIX socket to serve to
+  --socket-owner SOCKET_OWNER, -o SOCKET_OWNER
+                        User and group (should have same name) to set as owner of
+                        socket file through chown. If not set, socket will have
+                        read and write permissions for all users.
+```
+
+### exporter.py
+
+```
+usage: exporter.py [-h] [--socket-path SOCKET_PATH]
+                   [--listen-address LISTEN_ADDRESS] [--listen-port LISTEN_PORT]
+
+options:
+  -h, --help            show this help message and exit
+  --socket-path SOCKET_PATH
+                        Asbolute path of the UNIX socket to connect to
+  --listen-address LISTEN_ADDRESS, -l LISTEN_ADDRESS
+                        Address for HTTP server to listen on
+  --listen-port LISTEN_PORT, -p LISTEN_PORT
+                        Port for HTTP server to listen on
+```
+
 ## structure
 
 ### partition data from socket (csv)
