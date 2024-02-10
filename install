@@ -1,0 +1,6 @@
+mkdir -p /usr/local/bin/prometheus-disk-exporter
+
+cp -r getter /usr/local/bin/prometheus-disk-exporter/getter
+cp -r exporter /usr/local/bin/prometheus-disk-exporter/exporter
+
+cp -r systemd/* /etc/systemd/system/
