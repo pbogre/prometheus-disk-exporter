@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prometheus-disk-exporter"
+version = "0.0.1"
+authors = [
+    { name = "Pietro Bonaldo Gregori", email = "pietro.bogre@gmail.com" }
+]
+description = "S.M.A.R.T. and partition data exporter for the Prometheus monitoring system"
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = ["metrics", "disk", "prometheus", "exporter", "monitoring", "smart"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: System :: Monitoring",
+    "Intended Audience :: System Administrators",
+    "Operating System :: POSIX :: Linux"
+]
+dependencies = [
+    "prometheus_client>=0.19.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/pbogre/prometheus-disk-exporter"
+
+[project.scripts]
+prometheus_disk_exporter = "disk_exporter:main"
+prometheus_disk_getter = "disk_getter:main"
