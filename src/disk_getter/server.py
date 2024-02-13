@@ -57,14 +57,14 @@ def main():
     socket_path = args.socket_path
     script_path = os.path.join(os.path.dirname(__file__), "getter.sh")
 
-    if os.path.exists(socket_path):
-        # should always work as this program runs with privileges
-        os.remove(socket_path)
-
     user = subprocess.check_output(["whoami"], universal_newlines=True).replace('\n', '')
     if user != "root":
         logging.error(f"Not running as root! (user: '{user}')")
         exit(1)
+
+    if os.path.exists(socket_path):
+        # should always work as this program runs with privileges
+        os.remove(socket_path)
 
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
         logging.info(f"Binding to socket at '{socket_path}'...")
