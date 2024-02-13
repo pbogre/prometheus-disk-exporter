@@ -2,6 +2,9 @@ import os
 import subprocess
 import socket
 import argparse
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 def get_data(script_path) -> tuple[list[str], list[str]]:
     """
@@ -57,11 +60,19 @@ script_path = os.path.join(os.path.dirname(__file__), "getter.sh")
 
 if os.path.exists(socket_path):
     # should always work as this program runs with privileges
-    os.remove(socket_path) 
+    os.remove(socket_path)
+
+user = subprocess.check_output(["whoami"], universal_newlines=True).replace('\n', '')
+if user != "root":
+    logging.error(f"Not running as root! (user: '{user}')")
+    exit(1)
 
 with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
+    logging.info(f"Binding to socket at '{socket_path}'...")
     s.bind(socket_path)
 
+    logging.info(f"Setting socket permissions...")
+    logging.info(f"Socket owner: {args.socket_owner}")
     if args.socket_owner is None:
         os.chmod(socket_path, 0o666)
     else:
@@ -69,13 +80,14 @@ with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
         shutil.chown(socket_path, args.socket_owner, args.socket_owner)
         os.chmod(socket_path, 0o600)
 
+    logging.info(f"Started listening")
     s.listen(1)
 
     while True:
         conn, addr = s.accept()
         conn.shutdown(socket.SHUT_RD)
         with conn:
-            print("new connection")
+            logging.info(f"New connection accepted")
 
             disks, parts = get_data(script_path)
 
@@ -90,4 +102,6 @@ with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
             conn.sendall(disks_packet)
             conn.sendall(parts_packet)
 
-        print("data sent")
+            logging.info(f"Data sent to socket")
+
+        logging.info(f"Connection closed")

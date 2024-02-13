@@ -1,15 +1,16 @@
 import socket
 import argparse
+import logging
 from http.server import HTTPServer
 from prometheus_client import MetricsHandler, REGISTRY, GC_COLLECTOR, PROCESS_COLLECTOR, PLATFORM_COLLECTOR
 from prometheus_client.metrics_core import GaugeMetricFamily, InfoMetricFamily
 from prometheus_client.registry import Collector
 
+logging.basicConfig(level=logging.INFO)
+
 def connect_socket(socket_path) -> socket.socket:
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     sock.connect(socket_path)
-
-    print("connection successful")
 
     return sock
 
@@ -27,6 +28,7 @@ class DiskCollector(Collector):
         self.socket_path = socket_path
 
     def collect(self):
+        logging.info(f"Began data collection")
         # first check if the getter socket works
         disk_getter_error = GaugeMetricFamily(
                 'disk_getter_error',
@@ -36,17 +38,20 @@ class DiskCollector(Collector):
 
         # we reconnect on each collection because 
         # that's how the server knows when to serve
+        logging.info(f"Connecting to socket and retrieving data...")
         try:
             self.sock = connect_socket(self.socket_path)
             self.disks, self.parts = receive_packets(self.sock)
         except Exception as e:
-            print("an exception has occurred while connecting to/retrieving from getter socket!")
+            logging.error(f"Exception occured while connecting to or retrieving from socket ({e.__class__.__name__})")
             disk_getter_error.add_metric([e.__class__.__name__], 1)
             yield disk_getter_error
             return
 
         disk_getter_error.add_metric(['None'], 0)
         yield disk_getter_error
+
+        logging.info(f"Gathering metrics...")
 
         # if socket works, proceed with metrics
         disk_labels = ['disk_serial']
@@ -93,6 +98,8 @@ class DiskCollector(Collector):
 
         self.sock.close()
 
+        logging.info(f"Collection process ended")
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -123,4 +130,5 @@ if __name__ == '__main__':
     REGISTRY.unregister(PROCESS_COLLECTOR)
     REGISTRY.unregister(PLATFORM_COLLECTOR)
 
+    logging.info(f"Starting to listen to '{args.listen_address}' on port {args.listen_port}...")
     HTTPServer((args.listen_address, args.listen_port), MetricsHandler).serve_forever()
