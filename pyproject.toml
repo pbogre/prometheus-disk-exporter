@@ -10,6 +10,7 @@ authors = [
 ]
 description = "S.M.A.R.T. and partition data exporter for the Prometheus monitoring system"
 readme = "README.md"
+license = { text = "Apache-2.0" }
 requires-python = ">=3.11"
 keywords = ["metrics", "disk", "prometheus", "exporter", "monitoring", "smart"]
 classifiers = [
