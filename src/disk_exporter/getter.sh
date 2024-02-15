@@ -1,8 +1,8 @@
 #!/bin/bash
 
-lsblk=$(lsblk -o TYPE,FSTYPE,FSUSED,SIZE,MOUNTPOINT,NAME,NAME -b)
+lsblk=$(lsblk -o TYPE,FSTYPE,FSUSED,SIZE,MOUNTPOINT,NAME -b --tree=)
 
-disk_blks=$( echo "$lsblk" | awk '$1=="disk" {print "/dev/"$2}')
+disk_blks=$( echo "$lsblk" | awk '$1=="disk" {print "/dev/"$3}')
 for i in $disk_blks;
 do
     smart=$(sudo smartctl -iA $i)
@@ -22,4 +22,4 @@ do
 done
 echo "DISK DATA END"
 
-echo "$lsblk" | awk '$1=="part" && $7!="" {print "/dev/"$7","$5","$2","$3","$4}'
+echo "$lsblk" | awk '$1=="part" && $6!="" {print "/dev/"$6","$5","$2","$3","$4}'
