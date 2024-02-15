@@ -9,7 +9,7 @@ class DiskCollector(Collector):
         self.script_path = os.path.join(os.path.dirname(__file__), "getter.sh")
 
     def get_data(self):
-        output = subprocess.check_output(["sudo", self.script_path]).decode()
+        output = subprocess.check_output([self.script_path]).decode()
         disk_csv, part_csv = output.split("\nDISK DATA END\n")
 
         # parse disk data

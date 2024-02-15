@@ -5,7 +5,7 @@ lsblk=$(lsblk -o TYPE,FSTYPE,FSUSED,FSSIZE,MOUNTPOINT,NAME,NAME -b)
 disk_blks=$( echo "$lsblk" | awk '$1=="disk" {print "/dev/"$2}')
 for i in $disk_blks;
 do
-    smart=$(smartctl -iA $i)
+    smart=$(sudo smartctl -iA $i)
 
     serial_number=$(echo "$smart" | grep "Serial Number:" | sed 's/^Serial Number:\s*\(\S.*\)$/\1/g')
     model_family=$(echo "$smart" | grep "Model Family:" | sed 's/^Model Family:\s*\(\S.*\)$/\1/g')
