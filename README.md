@@ -51,7 +51,7 @@ These steps assume that you are running with root privileges.
 
 1. Add sudoers configuration to run `smartctl` without password.
 ```
-# echo 'prometheus ALL=(ALL:ALL) NOPASSWD: /usr/bin/smartctl' | tee -a /etc/sudoers.d/99-prometheus-disk-exporter
+# echo "prometheus ALL=(ALL:ALL) NOPASSWD: $(which smartctl)" | tee -a /etc/sudoers.d/99-prometheus-disk-exporter
 ```
 2. Create a systemd service `/etc/systemd/system/prometheus-disk-exporter.service` for this script.
    A sample can be found in the `systemd` folder of the repository.
