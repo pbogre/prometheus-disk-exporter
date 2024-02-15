@@ -4,9 +4,8 @@ Documentation=https://github.com/pbogre/prometheus-disk-exporter
 
 [Service]
 ExecStart=/opt/prometheus-disk-exporter/bin/prometheus_disk_exporter
-Type=simple
+Restart=always
 User=prometheus
-Group=prometheus
 
 [Install]
 WantedBy=multi-user.target
