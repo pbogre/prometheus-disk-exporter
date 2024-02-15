@@ -28,4 +28,3 @@ Homepage = "https://github.com/pbogre/prometheus-disk-exporter"
 
 [project.scripts]
 prometheus_disk_exporter = "disk_exporter:main"
-prometheus_disk_getter = "disk_getter:main"
