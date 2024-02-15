@@ -19,18 +19,18 @@ class DiskCollector(Collector):
 
         # parse partition data
         parts = []
-        for row in part_csv.split('\n'):
+        for row in part_csv.split('\n')[:-2]:
             parts.append(row.split(','))
+            # remove index 1 ("part")
+            parts[-1].pop(1)
             # find & add partition disk serial number
             for disk in disks:
                 if disk[0] in parts[-1][0]:
                     parts[-1].append(disk[1])
 
-        # cleanup
+        # remove block column from disks
         for disk in disks:
             disk.pop(0)
-
-        parts.pop()
 
         return disks, parts
 
@@ -93,11 +93,11 @@ class DiskCollector(Collector):
         # Partition metrics
         for part in self.parts:
             part_info.add_metric([part[0], part[5]], {
-                'mountpoint': part[1],
-                'filesystem': part[2]
+                'mountpoint': part[4],
+                'filesystem': part[1]
             })
-            part_usage_bytes.add_metric([part[0], part[5]], part[3])
-            part_size_bytes.add_metric([part[0], part[5]], part[4])
+            part_usage_bytes.add_metric([part[0], part[5]], part[2])
+            part_size_bytes.add_metric([part[0], part[5]], part[3])
 
         yield part_info
         yield part_usage_bytes

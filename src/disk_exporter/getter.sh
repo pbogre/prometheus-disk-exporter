@@ -1,11 +1,11 @@
 #!/bin/bash
 
-lsblk=$(lsblk -o TYPE,FSTYPE,FSUSED,SIZE,MOUNTPOINT,NAME -b --tree=)
+lsblk=$(lsblk -o NAME,TYPE,FSTYPE,FSUSED,SIZE,MOUNTPOINT -b --raw)
 
-disk_blks=$( echo "$lsblk" | awk '$1=="disk" {print "/dev/"$3}')
+disk_blks=$( echo "$lsblk" | awk '$2=="disk" {print $1}')
 for i in $disk_blks;
 do
-    smart=$(sudo smartctl -iA $i)
+    smart=$(sudo smartctl -iA "/dev/"$i)
 
     serial_number=$(echo "$smart" | grep "Serial Number:" | sed 's/^Serial Number:\s*\(\S.*\)$/\1/g')
     model_family=$(echo "$smart" | grep "Model Family:" | sed 's/^Model Family:\s*\(\S.*\)$/\1/g')
@@ -22,4 +22,4 @@ do
 done
 echo "DISK DATA END"
 
-echo "$lsblk" | awk '$1=="part" && $6!="" {print "/dev/"$6","$5","$2","$3","$4}'
+echo "$lsblk" | sed 's/ /,/g' | awk -F ',' '$2=="part" {print}'
