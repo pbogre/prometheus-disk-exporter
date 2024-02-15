@@ -1,6 +1,6 @@
 #!/bin/bash
 
-lsblk=$(lsblk -o TYPE,FSTYPE,FSUSED,FSSIZE,MOUNTPOINT,NAME,NAME -b)
+lsblk=$(lsblk -o TYPE,FSTYPE,FSUSED,SIZE,MOUNTPOINT,NAME,NAME -b)
 
 disk_blks=$( echo "$lsblk" | awk '$1=="disk" {print "/dev/"$2}')
 for i in $disk_blks;
