@@ -29,7 +29,7 @@ def main():
 
     args = parser.parse_args()
 
-    REGISTRY.register(DiskCollector(args.socket_path))
+    REGISTRY.register(DiskCollector())
 
     # disable default metrics
     REGISTRY.unregister(GC_COLLECTOR)
