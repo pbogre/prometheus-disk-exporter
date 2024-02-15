@@ -8,11 +8,6 @@ def main():
     logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-            "--socket-path", 
-            default="/tmp/prometheus-disk-exporter.sock",
-            help="Asbolute path of the UNIX socket to connect to"
-            )
 
     parser.add_argument(
             "--listen-address", "-l",
@@ -29,7 +24,7 @@ def main():
 
     args = parser.parse_args()
 
-    REGISTRY.register(DiskCollector(args.socket_path))
+    REGISTRY.register(DiskCollector())
 
     # disable default metrics
     REGISTRY.unregister(GC_COLLECTOR)

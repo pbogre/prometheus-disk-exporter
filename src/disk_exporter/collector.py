@@ -1,44 +1,55 @@
-import socket
 import logging
+import subprocess
+import os
 from prometheus_client.metrics_core import GaugeMetricFamily, InfoMetricFamily
 from prometheus_client.registry import Collector
 
-def connect_socket(socket_path) -> socket.socket:
-    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    sock.connect(socket_path)
-
-    return sock
-
-def receive_packets(sock: socket.socket):
-    disks_packet_size = int.from_bytes(sock.recv(4))
-    parts_packet_size = int.from_bytes(sock.recv(4))
-
-    disks = eval(sock.recv(disks_packet_size))
-    parts = eval(sock.recv(parts_packet_size))
-
-    return disks, parts
-
 class DiskCollector(Collector):
-    def __init__(self, socket_path):
-        self.socket_path = socket_path
+    def __init__(self):
+        self.script_path = os.path.join(os.path.dirname(__file__), "getter.sh")
+
+    def get_data(self):
+        output = subprocess.check_output([self.script_path]).decode()
+        disk_csv, part_csv = output.split("\nDISK DATA END\n")
+
+        # parse disk data
+        disks = []
+        for row in disk_csv.split('\n'):
+            disks.append(row.split(','))
+
+        # parse partition data
+        parts = []
+        for row in part_csv.split('\n'):
+            parts.append(row.split(','))
+            # find & add partition disk serial number
+            for disk in disks:
+                if disk[0] in parts[-1][0]:
+                    parts[-1].append(disk[1])
+
+        # cleanup
+        for disk in disks:
+            disk.pop(0)
+
+        parts.pop()
+
+        return disks, parts
 
     def collect(self):
         logging.info(f"Began data collection")
-        # first check if the getter socket works
+
+        # first check if running shell script 
+        # gives no errors
         disk_getter_error = GaugeMetricFamily(
                 'disk_getter_error',
-                'Indicates an error with getter socket (connection/retrieving)',
+                'Indicates an internal error while getting data from shell script',
                 labels=['type']
                 )
 
-        # we reconnect on each collection because 
-        # that's how the server knows when to serve
-        logging.info(f"Connecting to socket and retrieving data...")
+        logging.info(f"Running shell script to get data...")
         try:
-            self.sock = connect_socket(self.socket_path)
-            self.disks, self.parts = receive_packets(self.sock)
+            self.disks, self.parts = self.get_data()
         except Exception as e:
-            logging.error(f"Exception occured while connecting to or retrieving from socket ({e.__class__.__name__})")
+            logging.error(f"Exception occured while running shell script ({e.__class__.__name__})")
             disk_getter_error.add_metric([e.__class__.__name__], 1)
             yield disk_getter_error
             return
@@ -46,9 +57,10 @@ class DiskCollector(Collector):
         disk_getter_error.add_metric(['None'], 0)
         yield disk_getter_error
 
+        # if there are no errors, proceed
+        # with the rest of the metrics
         logging.info(f"Gathering metrics...")
 
-        # if socket works, proceed with metrics
         disk_labels = ['disk_serial']
         disk_model = InfoMetricFamily('disk_model', 'Disk Model Family', labels=disk_labels)
         disk_power_on_hours = GaugeMetricFamily('disk_power_on_hours', 'Hours spent with disk powered', labels=disk_labels)
@@ -90,7 +102,5 @@ class DiskCollector(Collector):
         yield part_info
         yield part_usage_bytes
         yield part_size_bytes
-
-        self.sock.close()
 
         logging.info(f"Collection process ended")

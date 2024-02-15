@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -28,4 +28,3 @@ Homepage = "https://github.com/pbogre/prometheus-disk-exporter"
 
 [project.scripts]
 prometheus_disk_exporter = "disk_exporter:main"
-prometheus_disk_getter = "disk_getter:main"
