@@ -1,9 +1,8 @@
 [Unit]
-Description=Service to export disk and partition data received from prometheus-disk-getter
-Requires=prometheus-disk-getter.service
+Description=Service to export S.M.A.R.T. and partition data as Prometheus metrics
 
 [Service]
-ExecStart=/usr/bin/python /usr/local/bin/prometheus-disk-exporter/exporter/exporter.py
+ExecStart=/usr/local/bin/prometheus-disk-exporter
 Type=simple
 User=prometheus
 Group=prometheus
