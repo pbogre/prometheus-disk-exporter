@@ -22,4 +22,4 @@ do
 done
 echo "DISK DATA END"
 
-echo "$lsblk" | awk '$1=="part" {print "/dev/"$7","$5","$2","$3","$4}'
+echo "$lsblk" | awk '$1=="part" && $7!="" {print "/dev/"$7","$5","$2","$3","$4}'
