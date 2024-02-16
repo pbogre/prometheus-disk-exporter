@@ -1,3 +1,11 @@
+<p align="center">
+<img src="https://img.shields.io/github/repo-size/pbogre/prometheus-disk-exporter">
+<a href="https://pypi.org/project/prometheus-disk-exporter"><img src="https://img.shields.io/pypi/v/prometheus-disk-exporter"></a>
+<img src="https://img.shields.io/github/license/pbogre/prometheus-disk-exporter">
+</p>
+
+---
+
 # prometheus-disk-exporter
 
 A prometheus exporter for disk S.M.A.R.T. data and partition usage
