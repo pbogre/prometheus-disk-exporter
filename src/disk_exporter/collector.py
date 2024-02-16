@@ -79,10 +79,14 @@ class DiskCollector(Collector):
                 'model_family': disk[1],
                 'rpm': disk[2]
             })
-            disk_power_on_hours.add_metric([disk[0]], disk[3])
-            disk_power_cycle_count.add_metric([disk[0]], disk[4])
-            disk_raw_read_error_rate.add_metric([disk[0]], disk[5])
-            disk_temperature.add_metric([disk[0]], disk[6])
+            if disk[3]:
+                disk_power_on_hours.add_metric([disk[0]], disk[3])
+            if disk[4]:
+                disk_power_cycle_count.add_metric([disk[0]], disk[4])
+            if disk[5]:
+                disk_raw_read_error_rate.add_metric([disk[0]], disk[5])
+            if disk[6]:
+                disk_temperature.add_metric([disk[0]], disk[6])
 
         yield disk_model
         yield disk_power_on_hours
@@ -96,8 +100,10 @@ class DiskCollector(Collector):
                 'mountpoint': part[4],
                 'filesystem': part[1]
             })
-            part_usage_bytes.add_metric([part[0], part[5]], part[2])
-            part_size_bytes.add_metric([part[0], part[5]], part[3])
+            if part[2]:
+                part_usage_bytes.add_metric([part[0], part[5]], part[2])
+            if part[3]:
+                part_size_bytes.add_metric([part[0], part[5]], part[3])
 
         yield part_info
         yield part_usage_bytes
