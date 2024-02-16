@@ -31,5 +31,6 @@ def main():
     REGISTRY.unregister(PROCESS_COLLECTOR)
     REGISTRY.unregister(PLATFORM_COLLECTOR)
 
-    logging.info(f"Starting to listen to '{args.listen_address}' on port {args.listen_port}...")
+    logging.info(f"Starting to listen to '{args.listen_address}' on port {args.listen_port}... " +
+                 f"(http://{args.listen_address}:{args.listen_port})")
     HTTPServer((args.listen_address, args.listen_port), MetricsHandler).serve_forever()
