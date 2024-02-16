@@ -19,7 +19,10 @@ class DiskCollector(Collector):
 
         # parse partition data
         parts = []
-        for row in part_csv.split('\n')[:-2]:
+        for row in part_csv.split('\n'):
+            if not row:
+                continue
+
             parts.append(row.split(','))
             # remove index 1 ("part")
             parts[-1].pop(1)
