@@ -10,6 +10,9 @@ privileges. Instead, the only command which requires these privileges
 the installation step includes adding a sudoers configuration to run
 this command without the need of a password for the specified user.
 
+If you are running this on a proxmox host, the partitions that are
+mounted in container or VM guests will not have the usage entry.
+
 ## installing
 
 These steps assume that you are running with root privileges.
